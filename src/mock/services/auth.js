@@ -6,6 +6,7 @@ const username = ['admin', 'super']
 // '21232f297a57a5a743894a0e4a801fc3',
 const password = ['8914de686ab28dc22f30d3d8e107ff6c', '21232f297a57a5a743894a0e4a801fc3'] // admin, ant.design
 
+// eslint-disable-next-line no-unused-vars
 const login = (options) => {
   const body = getBody(options)
   console.log('mock: body', body)
@@ -32,6 +33,7 @@ const login = (options) => {
   }, '', 200, { 'Custom-Header': Mock.mock('@guid') })
 }
 
+// eslint-disable-next-line no-unused-vars
 const logout = () => {
   return builder({}, '[测试接口] 注销成功')
 }
@@ -44,7 +46,7 @@ const twofactor = () => {
   return builder({ stepCode: Mock.mock('@integer(0, 1)') })
 }
 
-Mock.mock(/\/auth\/login/, 'post', login)
-Mock.mock(/\/auth\/logout/, 'post', logout)
+// Mock.mock(/\/auth\/login/, 'post', login)
+// Mock.mock(/\/auth\/logout/, 'post', logout)
 Mock.mock(/\/account\/sms/, 'post', smsCaptcha)
 Mock.mock(/\/auth\/2step-code/, 'post', twofactor)

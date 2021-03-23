@@ -6,8 +6,8 @@
         <a-input
           size="large"
           type="text"
-          :placeholder="$t('user.register.email.placeholder')"
-          v-decorator="['email', {rules: [{ required: true, type: 'email', message: $t('user.email.required') }], validateTrigger: ['change', 'blur']}]"
+          placeholder="账号"
+          v-decorator="['account', {rules: [{ required: true, message: '请输入账号' }, { validator: this.handleAccountLength }], validateTrigger: ['change', 'blur']}]"
         ></a-input>
       </a-form-item>
 
@@ -45,38 +45,13 @@
       </a-form-item>
 
       <a-form-item>
-        <a-input size="large" :placeholder="$t('user.login.mobile.placeholder')" v-decorator="['mobile', {rules: [{ required: true, message: $t('user.phone-number.required'), pattern: /^1[3456789]\d{9}$/ }, { validator: this.handlePhoneCheck } ], validateTrigger: ['change', 'blur'] }]">
-          <a-select slot="addonBefore" size="large" defaultValue="+86">
-            <a-select-option value="+86">+86</a-select-option>
-            <a-select-option value="+87">+87</a-select-option>
-          </a-select>
+        <a-input
+          size="large"
+          type="text"
+          placeholder="姓名"
+          v-decorator="['name', {rules: [{ required: true, message: '请输入姓名' }], validateTrigger: ['change', 'blur']}]">
         </a-input>
       </a-form-item>
-      <!--<a-input-group size="large" compact>
-            <a-select style="width: 20%" size="large" defaultValue="+86">
-              <a-select-option value="+86">+86</a-select-option>
-              <a-select-option value="+87">+87</a-select-option>
-            </a-select>
-            <a-input style="width: 80%" size="large" placeholder="11 位手机号"></a-input>
-          </a-input-group>-->
-
-      <a-row :gutter="16">
-        <a-col class="gutter-row" :span="16">
-          <a-form-item>
-            <a-input size="large" type="text" :placeholder="$t('user.login.mobile.verification-code.placeholder')" v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
-              <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-            </a-input>
-          </a-form-item>
-        </a-col>
-        <a-col class="gutter-row" :span="8">
-          <a-button
-            class="getCaptcha"
-            size="large"
-            :disabled="state.smsSendBtn"
-            @click.stop.prevent="getCaptcha"
-            v-text="!state.smsSendBtn && $t('user.register.get-verification-code')||(state.time+' s')"></a-button>
-        </a-col>
-      </a-row>
 
       <a-form-item>
         <a-button
@@ -96,9 +71,10 @@
 </template>
 
 <script>
-import { getSmsCaptcha } from '@/api/login'
+import { register } from '@/api/login'
 import { deviceMixin } from '@/store/device-mixin'
 import { scorePassword } from '@/utils/util'
+import md5 from 'md5'
 
 const levelNames = {
   0: 'user.password.strength.short',
@@ -151,11 +127,20 @@ export default {
     }
   },
   methods: {
+    handleAccountLength (rule, value, callback) {
+      if (value.length !== 8) {
+        callback(new Error('账号必须为8位'))
+      }
+      if (/[^0-9_]/.test(value)) {
+        callback(new Error('账号必须为纯数字'))
+      }
+      callback()
+    },
     handlePasswordLevel (rule, value, callback) {
       if (value === '') {
-       return callback()
+       callback()
       }
-      console.log('scorePassword ; ', scorePassword(value))
+      // console.log('scorePassword ; ', scorePassword(value))
       if (value.length >= 6) {
         if (scorePassword(value) >= 30) {
           this.state.level = 1
@@ -166,6 +151,7 @@ export default {
         if (scorePassword(value) >= 80) {
         this.state.level = 3
         }
+        callback()
       } else {
         this.state.level = 0
         callback(new Error(this.$t('user.password.strength.msg')))
@@ -186,14 +172,6 @@ export default {
       callback()
     },
 
-    handlePhoneCheck (rule, value, callback) {
-      console.log('handlePhoneCheck, rule:', rule)
-      console.log('handlePhoneCheck, value', value)
-      console.log('handlePhoneCheck, callback', callback)
-
-      callback()
-    },
-
     handlePasswordInputClick () {
       if (!this.isMobile) {
         this.state.passwordLevelChecked = true
@@ -203,66 +181,45 @@ export default {
     },
 
     handleSubmit () {
-      const { form: { validateFields }, state, $router } = this
+      const { form: { validateFields }, state } = this
       validateFields({ force: true }, (err, values) => {
         if (!err) {
+          const registerParams = { ...values }
+          delete registerParams.password2
           state.passwordLevelChecked = false
-          $router.push({ name: 'registerResult', params: { ...values } })
+          registerParams.password = md5(values.password)
+          this.registerBtn = true
+          register(registerParams)
+            .then(res => {
+              console.log(res)
+              if (res.error === true) {
+                this.requestFailed(res)
+              } else {
+                this.requestSuccess(res)
+              }
+            })
+            .catch(err => this.requestFailed(err))
         }
       })
     },
-
-    getCaptcha (e) {
-      e.preventDefault()
-      const { form: { validateFields }, state, $message, $notification } = this
-
-      validateFields(['mobile'], { force: true },
-        (err, values) => {
-          if (!err) {
-            state.smsSendBtn = true
-
-            const interval = window.setInterval(() => {
-              if (state.time-- <= 0) {
-                state.time = 60
-                state.smsSendBtn = false
-                window.clearInterval(interval)
-              }
-            }, 1000)
-
-            const hide = $message.loading('验证码发送中..', 0)
-
-            getSmsCaptcha({ mobile: values.mobile }).then(res => {
-              setTimeout(hide, 2500)
-              $notification['success']({
-                message: '提示',
-                description: '验证码获取成功，您的验证码为：' + res.result.captcha,
-                duration: 8
-              })
-            }).catch(err => {
-              setTimeout(hide, 1)
-              clearInterval(interval)
-              state.time = 60
-              state.smsSendBtn = false
-              this.requestFailed(err)
-            })
-          }
-        }
-      )
+    requestSuccess (res) {
+      this.registerBtn = false
+      this.$router.push({ name: 'registerResult', params: { res } })
     },
     requestFailed (err) {
       this.$notification['error']({
         message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        description: err.msg || ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
         duration: 4
       })
       this.registerBtn = false
     }
-  },
-  watch: {
-    'state.passwordLevel' (val) {
-      console.log(val)
-    }
   }
+  // watch: {
+  //   'state.passwordLevel' (val) {
+  //     console.log(val)
+  //   }
+  // }
 }
 </script>
 <style lang="less">

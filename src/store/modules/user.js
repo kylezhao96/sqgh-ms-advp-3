@@ -2,6 +2,7 @@ import storage from 'store'
 import { login, getInfo, logout } from '@/api/login'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import { welcome } from '@/utils/util'
+import { AdminRolePermissionsObj, AuditorRolePermissionsObj } from '@/config/role.config'
 
 const user = {
   state: {
@@ -48,11 +49,15 @@ const user = {
     },
 
     // 获取用户信息
-    GetInfo ({ commit }) {
+    GetInfo ({ commit, state }, token) {
       return new Promise((resolve, reject) => {
-        getInfo().then(response => {
+        getInfo(token).then(response => {
           const result = response.result
-
+          if (result.role_id === 'admin') {
+            result.role = AdminRolePermissionsObj
+          } else {
+            result.role = AuditorRolePermissionsObj
+          }
           if (result.role && result.role.permissions.length > 0) {
             const role = result.role
             role.permissions = result.role.permissions
@@ -65,6 +70,7 @@ const user = {
             role.permissionList = role.permissions.map(permission => { return permission.permissionId })
             commit('SET_ROLES', result.role)
             commit('SET_INFO', result)
+            console.log(result)
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))
           }
@@ -82,7 +88,10 @@ const user = {
     // 登出
     Logout ({ commit, state }) {
       return new Promise((resolve) => {
-        logout(state.token).then(() => {
+        const params = {
+          token: state.token
+        }
+        logout(params).then(() => {
           commit('SET_TOKEN', '')
           commit('SET_ROLES', [])
           storage.remove(ACCESS_TOKEN)

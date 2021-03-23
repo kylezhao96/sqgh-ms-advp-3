@@ -5,151 +5,150 @@
       依照步骤完成智慧风电数据导出及上传
     </template>
     <a-card :bordered="false">
-      <a-spin :spinning="uploading">
-        <a-form :form="form" style="max-width: 500px; margin: 40px auto 0;" enctype="multipart/form-data">
-          <a-form-item
-            label="数据月份"
-            :labelCol="labelCol"
-            :wrapperCol="wrapperCol"
+      <a-form :form="form" style="max-width: 500px; margin: 40px auto 0;" enctype="multipart/form-data">
+        <a-form-item
+          label="数据月份"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+        >
+          <a-month-picker placeholder="请选择月份" v-decorator="['fileMonth', { rules: [{required: true, message: '数据月份不可为空'}] }]"/>
+        </a-form-item>
+        <a-form-item
+          label="风机单机数据"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+        >
+          <a-upload-dragger
+            v-decorator="[
+              'wtFile',
+              {
+                valuePropName: 'fileList',
+                getValueFromEvent: normFile,
+              },
+              { rules: [{ required: true, message: '请先选择文件' }] },
+            ]"
+            accept=".zip"
+            :before-upload="beforeUploadWtFile"
+            name="file"
+            :multiple="false"
+            action="http://127.0.0.1:5000/imp/upload/wt-data"
           >
-            <a-month-picker placeholder="请选择月份" v-decorator="['fileMonth', { rules: [{required: true, message: '数据月份不可为空'}] }]"/>
-          </a-form-item>
-          <a-form-item
-            label="风机单机数据"
-            :labelCol="labelCol"
-            :wrapperCol="wrapperCol"
+            <p class="ant-upload-drag-icon">
+              <a-icon type="inbox" />
+            </p>
+            <p class="ant-upload-text">
+              点击或将文件拖拽至此区域来上传
+            </p>
+            <p class="ant-upload-hint">
+              仅支持单文件上传
+            </p>
+          </a-upload-dragger>
+        </a-form-item>
+        <a-form-item
+          label="风机故障文件"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+        >
+          <a-upload-dragger
+            v-decorator="[
+              'gzFile',
+              {
+                valuePropName: 'fileList',
+                getValueFromEvent: normFile,
+              },
+              { rules: [{ required: true, message: '请先选择文件' }] },
+            ]"
+            accept=".csv"
+            :before-upload="beforeUploadGzFile"
+            name="file"
+            :multiple="false"
+            action="http://127.0.0.1:5000/imp/upload/gz-data"
           >
-            <a-upload-dragger
-              v-decorator="[
-                'wtFile',
-                {
-                  valuePropName: 'fileList',
-                  getValueFromEvent: normFile,
-                },
-                { rules: [{ required: true, message: '请先选择文件' }] },
-              ]"
-              accept=".zip"
-              :before-upload="beforeUploadWtFile"
-              name="file"
-              :multiple="false"
-              action="http://127.0.0.1:5000/imp/upload/wt-data"
-            >
-              <p class="ant-upload-drag-icon">
-                <a-icon type="inbox" />
-              </p>
-              <p class="ant-upload-text">
-                点击或将文件拖拽至此区域来上传
-              </p>
-              <p class="ant-upload-hint">
-                仅支持单文件上传
-              </p>
-            </a-upload-dragger>
-          </a-form-item>
-          <a-form-item
-            label="风机故障文件"
-            :labelCol="labelCol"
-            :wrapperCol="wrapperCol"
+            <p class="ant-upload-drag-icon">
+              <a-icon type="inbox" />
+            </p>
+            <p class="ant-upload-text">
+              点击或将文件拖拽至此区域来上传
+            </p>
+            <p class="ant-upload-hint">
+              仅支持单文件上传
+            </p>
+          </a-upload-dragger>
+        </a-form-item>
+        <a-form-item
+          label="测风塔文件"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+        >
+          <a-upload-dragger
+            v-decorator="[
+              'cftFile',
+              {
+                valuePropName: 'fileList',
+                getValueFromEvent: normFile,
+              },
+              { rules: [{ required: true, message: '请先选择文件' }] },
+            ]"
+            accept=".xls"
+            :before-upload="beforeUploadCftFile"
+            name="file"
+            :multiple="false"
+            action="http://127.0.0.1:5000/imp/upload/gz-data"
           >
-            <a-upload-dragger
-              v-decorator="[
-                'gzFile',
-                {
-                  valuePropName: 'fileList',
-                  getValueFromEvent: normFile,
-                },
-                { rules: [{ required: true, message: '请先选择文件' }] },
-              ]"
-              accept=".csv"
-              :before-upload="beforeUploadGzFile"
-              name="file"
-              :multiple="false"
-              action="http://127.0.0.1:5000/imp/upload/gz-data"
-            >
-              <p class="ant-upload-drag-icon">
-                <a-icon type="inbox" />
-              </p>
-              <p class="ant-upload-text">
-                点击或将文件拖拽至此区域来上传
-              </p>
-              <p class="ant-upload-hint">
-                仅支持单文件上传
-              </p>
-            </a-upload-dragger>
-          </a-form-item>
-          <a-form-item
-            label="测风塔文件"
-            :labelCol="labelCol"
-            :wrapperCol="wrapperCol"
+            <p class="ant-upload-drag-icon">
+              <a-icon type="inbox" />
+            </p>
+            <p class="ant-upload-text">
+              点击或将文件拖拽至此区域来上传
+            </p>
+            <p class="ant-upload-hint">
+              仅支持单文件上传
+            </p>
+          </a-upload-dragger>
+        </a-form-item>
+        <a-form-item
+          label="日报表"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+        >
+          <a-upload-dragger
+            v-decorator="[
+              'rbbFile',
+              {
+                valuePropName: 'fileList',
+                getValueFromEvent: normFile,
+              }
+            ]"
+            accept=".xlsx"
+            :before-upload="beforeUploadRbbFile"
+            name="file"
+            :multiple="false"
+            action="http://127.0.0.1:5000/imp/upload/gz-data"
           >
-            <a-upload-dragger
-              v-decorator="[
-                'cftFile',
-                {
-                  valuePropName: 'fileList',
-                  getValueFromEvent: normFile,
-                },
-                { rules: [{ required: true, message: '请先选择文件' }] },
-              ]"
-              accept=".xls"
-              :before-upload="beforeUploadCftFile"
-              name="file"
-              :multiple="false"
-              action="http://127.0.0.1:5000/imp/upload/gz-data"
-            >
-              <p class="ant-upload-drag-icon">
-                <a-icon type="inbox" />
-              </p>
-              <p class="ant-upload-text">
-                点击或将文件拖拽至此区域来上传
-              </p>
-              <p class="ant-upload-hint">
-                仅支持单文件上传
-              </p>
-            </a-upload-dragger>
-          </a-form-item>
-          <a-form-item
-            label="日报表"
-            :labelCol="labelCol"
-            :wrapperCol="wrapperCol"
+            <p class="ant-upload-drag-icon">
+              <a-icon type="inbox" />
+            </p>
+            <p class="ant-upload-text">
+              点击或将文件拖拽至此区域来上传
+            </p>
+            <p class="ant-upload-hint">
+              仅支持单文件上传
+            </p>
+          </a-upload-dragger>
+        </a-form-item>
+        <a-form-item :wrapperCol="{span: 19, offset: 5}">
+          <a-button
+            type="primary"
+            @click="uploadFile"
+            :loading="uploading"
+            :disabled="(wtFileList.length === 0 || gzFileList.length === 0 || rbbFileList.length === 0 || cftFileList.length === 0)"
+            style="margin-right: 20px"
           >
-            <a-upload-dragger
-              v-decorator="[
-                'rbbFile',
-                {
-                  valuePropName: 'fileList',
-                  getValueFromEvent: normFile,
-                }
-              ]"
-              accept=".xlsx"
-              :before-upload="beforeUploadRbbFile"
-              name="file"
-              :multiple="false"
-              action="http://127.0.0.1:5000/imp/upload/gz-data"
-            >
-              <p class="ant-upload-drag-icon">
-                <a-icon type="inbox" />
-              </p>
-              <p class="ant-upload-text">
-                点击或将文件拖拽至此区域来上传
-              </p>
-              <p class="ant-upload-hint">
-                仅支持单文件上传
-              </p>
-            </a-upload-dragger>
-          </a-form-item>
-          <a-form-item :wrapperCol="{span: 19, offset: 5}">
-            <a-button
-              type="primary"
-              @click="uploadFile"
-              :disabled="(wtFileList.length === 0 || gzFileList.length === 0 || rbbFileList.length === 0 || cftFileList.length === 0)"
-              style="margin-right: 20px"
-            >
-              {{ uploading ? '正在上传' : '点击上传' }}
-            </a-button>
-            <a-button type="primary" @click="downloadFile" :disabled="disButton" style="margin-right: 20px">下载上次数据</a-button>
-          </a-form-item>
-        </a-form>
-      </a-spin>
+            {{ uploading ? '正在上传' : '点击上传' }}
+          </a-button>
+          <a-button type="primary" :loading="downloadButtonLoading" @click="downloadFile" :disabled="(disButton || uploading)" style="margin-right: 20px">下载上次数据</a-button>
+        </a-form-item>
+      </a-form>
     </a-card>
   </page-header-wrapper>
 </template>
@@ -169,7 +168,8 @@ export default {
       rbbFileList: [],
       cftFileList: [],
       uploading: false,
-      disButton: false
+      disButton: false,
+      downloadButtonLoading: false
     }
   },
   beforeCreate () {
@@ -235,6 +235,7 @@ export default {
     },
     downloadFile () {
       const link = document.createElement('a')
+      this.downloadButtonLoading = true
       downloadLatestFile().then(res => {
         console.log(res)
         const blob = new Blob([res], { type: 'application/zip' })
@@ -243,6 +244,7 @@ export default {
         link.download = '智慧风电数据.zip' // 自定义文件名
         link.click() // 下载文件
         URL.revokeObjectURL(objectUrl) // 释放内存
+        this.downloadButtonLoading = false
       }).catch(err => {
           this.$notification['error']({
             message: '错误',

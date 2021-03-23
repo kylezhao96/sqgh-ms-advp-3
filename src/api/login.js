@@ -32,21 +32,27 @@ export function login (parameter) {
   })
 }
 
-export function getSmsCaptcha (parameter) {
+export function logout (parameter) {
   return request({
-    url: userApi.SendSms,
+    url: userApi.Logout,
     method: 'post',
     data: parameter
   })
 }
 
-export function getInfo () {
+export function register (parameter) {
+  return request({
+    url: userApi.Register,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function getInfo (token) {
   return request({
     url: userApi.UserInfo,
     method: 'get',
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
+    params: { token: token }
   })
 }
 
@@ -54,16 +60,6 @@ export function getCurrentUserNav () {
   return request({
     url: userApi.UserMenu,
     method: 'get'
-  })
-}
-
-export function logout () {
-  return request({
-    url: userApi.Logout,
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
   })
 }
 

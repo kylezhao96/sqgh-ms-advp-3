@@ -1,6 +1,7 @@
 import Mock from 'mockjs2'
 import { builder } from '../util'
 
+// eslint-disable-next-line no-unused-vars
 const info = (options) => {
   console.log('options', options)
   const userInfo = {
@@ -756,5 +757,5 @@ const userNav = (options) => {
   return json
 }
 
-Mock.mock(/\/api\/user\/info/, 'get', info)
+// Mock.mock(/\/api\/user\/info/, 'get', info)
 Mock.mock(/\/api\/user\/nav/, 'get', userNav)

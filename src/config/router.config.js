@@ -274,25 +274,34 @@ export const asyncRouterMap = [
         path: '/iwp',
         redirect: '/iwp/upload',
         component: RouteView,
-        meta: { title: '智慧风电', icon: 'desktop' },
+        meta: { title: '智慧风电', icon: 'desktop', permission: ['iwp'] },
         children: [
           {
             path: '/iwp/upload',
             name: 'Upload',
             component: () => import('@/views/iwp/UploadForm'),
-            meta: { title: '数据上传', keepAlive: true }
+            meta: { title: '数据上传', keepAlive: true, permission: ['iwp'] }
           },
-          // {
-          //   path: '/iwp/upload-step',
-          //   name: 'StepUpload',
-          //   // component: () => import('@/views/iwp/upload/StepForm'),
-          //   meta: { title: '数据分步骤上传', keepAlive: true }
-          // },
           {
             path: '/iwp/tutorial',
             name: 'Tutorial',
             component: () => import('@/views/iwp/tutorial/Tutorial'),
-            meta: { title: '数据导出教程', keepAlive: true }
+            meta: { title: '数据导出教程', keepAlive: true, permission: ['iwp'] }
+          }
+        ]
+      },
+      // 指标分析
+      {
+        path: '/statistics',
+        redirect: '/statistics/statistics1',
+        component: RouteView,
+        meta: { title: '指标分析', icon: 'fund', permission: ['statistics'] },
+        children: [
+          {
+            path: '/statistics/statistics1',
+            name: '1',
+            component: () => import('@/views/statistics/statistics1'),
+            meta: { title: '指标分析（1）', keepAlive: true, permission: ['iwp'] }
           }
         ]
       }

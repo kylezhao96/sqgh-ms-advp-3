@@ -12,7 +12,7 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const allowList = ['login', 'register', 'registerResult'] // no redirect allowList
 const loginRoutePath = '/user/login'
-const defaultRoutePath = '/dashboard/workplace'
+const defaultRoutePath = '/iwp/upload'
 
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
@@ -24,10 +24,12 @@ router.beforeEach((to, from, next) => {
       NProgress.done()
     } else {
       // check login user.roles is null
+      console.log('store.getters.roles')
+      console.log(store.getters.roles)
       if (store.getters.roles.length === 0) {
         // request login userInfo
         store
-          .dispatch('GetInfo')
+          .dispatch('GetInfo', storage.get(ACCESS_TOKEN))
           .then(res => {
             const roles = res.result && res.result.role
             // generate dynamic router
@@ -46,7 +48,8 @@ router.beforeEach((to, from, next) => {
               }
             })
           })
-          .catch(() => {
+          .catch((err) => {
+            console.log(err)
             notification.error({
               message: '错误',
               description: '请求用户信息失败，请重试'
